@@ -10,10 +10,80 @@ from oauth2client import tools
 
 from apiclient.errors import HttpError
 
-
 import pprint
+from tabulate import tabulate
 
 
+
+class Analytics(object):
+	"""
+	Class to communicate with Google Analytica
+	"""
+	service = None
+	
+	def __init__(self):
+		"""
+		Initialise the analytics object and set up service that connects to Google API
+		"""
+		# Parse command-line arguments.
+		parser = argparse.ArgumentParser(
+		  formatter_class=argparse.RawDescriptionHelpFormatter,
+		  parents=[tools.argparser])
+		flags = parser.parse_args([])
+
+		# Set up a Flow object to be used if we need to authenticate.
+		flow = client.flow_from_clientsecrets(
+		  client_secrets_path, scope=scope,
+		  message=tools.message_if_missing(client_secrets_path))
+
+		# Prepare credentials, and authorize HTTP object with them.
+		# If the credentials don't exist or are invalid run through the native client
+		# flow. The Storage object will ensure that if successful the good
+		# credentials will get written back to a file.
+		storage = file.Storage(api_name + '.dat')
+		credentials = storage.get()
+		if credentials is None or credentials.invalid:
+			credentials = tools.run_flow(flow, storage, flags)
+		http = credentials.authorize(http=httplib2.Http())
+
+		# Build the service object.
+		self.service = build(api_name, api_version, http=http)
+
+	def execute_query(self, query):
+		"""
+		Try to execute the api query
+		"""
+		try:
+			results = query.execute()
+			return results
+		except HttpError, e:
+			logger.warning("HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
+    		
+	def print_table(self, data):
+		"""
+		Prints table of data to console
+		data: list of dictionaries, value of "items" from analytics response
+		"""		
+		for item in data:
+			table = [] 
+			for key, value in item.items():
+				table.append([key, value])
+				
+			print tabulate(table)
+			print "\n"
+    	
+	def list_accounts(self):
+		"""
+		Returns list of owned accounts
+		"""
+		query = self.service.management().accounts().list()
+		accounts = self.execute_query(query)
+
+		self.print_table(accounts.get("items"))
+		return account_data
+    
+
+	
 
 def get_service(api_name, api_version, scope, client_secrets_path):
   """Get a service that communicates to a Google API.
@@ -66,7 +136,7 @@ def list_accounts(service):
 		data["permissions"] = account["permissions"]
 		account_data.append(data)
 
-	pprint.pprint(account_data)
+	pprint.pprint(accounts.get("items"))
 	return account_data
 	
 	
@@ -133,15 +203,12 @@ def add_user(service, id, email, permissions):
 def delete_user(service, id, email):
 	#to delete user must find their link ID
 	users = list_users(service, id)
-	print "\n email : ", email
 	for user in users:
-		print "\n", user["userRef"]["email"] 
 		if user["userRef"]["email"] == email:
 			#user[id] comes from profileUserLinks func so must take out profile id and swap for account id for accountUserLinks func
 			main = user["id"]
 			separate_id = main.split(":")[1]
 			link_id = id + ":" + separate_id
-			print "\n link id: ", link_id
 			break
 		else:
 			link_id = None
@@ -207,6 +274,14 @@ user_parser_del = user_subparsers.add_parser("delete", description="delete a use
 user_parser_del.set_defaults(action="delete")
 user_parser_del.add_argument("account", help="id for the relevant account", type=str)
 user_parser_del.add_argument("email", help="email of the user to delete", type=str)
+
+#sub parser to update user 
+user_parser_upd = user_subparsers.add_parser("update", description="update a user on an account")
+user_parser_upd.set_defaults(action="update")
+user_parser_upd.add_argument("account", help="id for the relevant account", type=str)
+user_parser_upd.add_argument("email", help="email of the user to update", type=str)
+#user_parser_add.add_argument("--permissions", "-perms", help="permissions", type=str, nargs="*", choices=["COLLABORATE", "EDIT", "READ_AND_ANALYZE", "MANAGE_USERS"], default=["READ_AND_ANALYZE"])
+
 
 """
 	Set up for accounts subcommands

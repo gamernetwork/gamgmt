@@ -1,0 +1,8 @@
+
+
+include *.json
+include gamgmt/*.json
+
+inlcude *.dat
+
+include sample/*.dat
