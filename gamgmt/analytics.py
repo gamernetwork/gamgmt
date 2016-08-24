@@ -12,6 +12,15 @@ import pkg_resources
 import json
 
 
+def default_fields(fields):
+    def default_fields_dec(func):
+        def func_wrapper(*args, **kwargs):
+            if not kwargs.has_key('fields') or not kwargs['fields']:
+                kwargs['fields'] = fields
+            return func(*args, **kwargs)
+        return func_wrapper
+    return default_fields_dec
+
 
 class Analytics(object):
 	"""
@@ -62,6 +71,10 @@ class Analytics(object):
 		# Build the service object.
 		self.service = build(api_name, api_version, http=http)
 
+	def _build_format(self, fields):
+		fmt = [ "%%(%s)s" % field for field in fields ]
+		fmt = ", ".join(fmt)
+		return fmt
 
 	def check_credentials(self):
 		secrets = pkg_resources.resource_string('gamgmt', "client_secrets.json")
@@ -117,28 +130,72 @@ class Analytics(object):
 		users = self.execute_query(query)
 		return users
     	
-	def list_accounts(self):
+	@default_fields(('name', 'id'))
+	def list_accounts(self, fields=None):
 		"""
 		Returns list of owned accounts
 		"""
 		query = self.service.management().accounts().list()
 		accounts = self.execute_query(query)
 
-		self.print_table(accounts.get("items"))
+		#self.print_table(accounts.get("items"))
+		fmt = self._build_format(fields)
+		account_data = []
+		for account in accounts.get('items'):
+			data = {}
+			data["name"] = account["name"]
+			data["id"] = account["id"]
+			data["permissions"] = account["permissions"]
+			account_data.append(data)
+
+		for a in account_data:
+			print(fmt % a)
+		
 		return accounts
 
-	def list_properties(self, account):
+	@default_fields(('name', 'id'))
+	def list_properties(self, account, fields=None):
 		query = self.service.management().webproperties().list(accountId=account)
 		properties= self.execute_query(query)
 
-		self.print_table(properties.get("items"))
+		#self.print_table(properties.get("items"))
+		fmt = self._build_format(fields)
+		property_data = []
+		for property in properties.get('items'):
+			data = {}
+			data["name"] = property["name"]
+			data["id"] = property["id"]
+			data["permissions"] = property["permissions"]
+			data["account_id"] = property["accountId"]
+			#data["website"] = property["websiteUrl"]
+			property_data.append(data)
+
+		for p in property_data:
+			print(fmt % p)
+				
 		return properties	
 		
-	def list_profiles(self, account, property):
+	@default_fields(('name', 'id'))
+	def list_profiles(self, account, property, fields=None):
 		query = self.service.management().profiles().list(accountId=account,webPropertyId=property)
 		profiles = self.execute_query(query)
 
-		self.print_table(profiles.get("items"))
+		#self.print_table(profiles.get("items"))
+		fmt = self._build_format(fields)
+		profiles_data = []
+		for profile in profiles.get('items'):
+			data = {}
+			data["name"] = profile["name"]
+			data["id"] = profile["id"]
+			data["permissions"] = profile["permissions"]
+			data["account_id"] = profile["accountId"]
+			data["property_id"] = profile["webPropertyId"]
+			data["website"] = profile["websiteUrl"]
+			profiles_data.append(data)
+			
+		for p in profiles_data:
+			print(fmt % p)
+			
 		return profiles
 
 	def list_users(self, id, property="~all", profile="~all"):
