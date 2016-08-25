@@ -10,11 +10,13 @@ Uses Google Analytics API v3.
 Install
 -------
 
-Pop it in a virtualenv for safety.
+Clone into a directory. 
+On same level install package
 
 ```shell
 virtualenv env
-env/bin/pip install -r requirements.txt
+source env/bin/activate
+pip install --editable gamgmt
 ```
 
 Generating OAuth Client ID
@@ -27,29 +29,36 @@ Generating OAuth Client ID
   - Go to Credentials -> Create Credentials
     - Choose "OAuth Client ID"
     - Choose "Other"
-  - Save the client ID and client Secret numbers
-  - The Client ID will appear under the Credentials tab, on the right click to "download JSON"
-  - Copy this file into your folder and fill in the path for the ```get_service()``` function
+  - Save the client ID and client Secret numbers  
   
-  
+
+Setup 
+-----
+ - Run an initial command:
+```gamgmt account list```
+
+ - This will run the setup function. 
+ - Follow the instructions to insert your client secret, client id and project id. 
+
 Usage
 -----
 
 Examples:
-```python gamgmt.py accounts list``` 
+
 - list all your accounts
+```gamgmt account list```
 
-```python gamgmt.py properties list```
 - list all your properties
+```gamgmt property list```
 
-```python gamgmt.py profiles list ```
-- list all your profiles
+-  list all your profiles
+```gamgmt profile list ```
 
-```python gamgmt.py user list 1234```
 - list all the users for specified account number 1234
+```gamgmt user list 1234```
 
-```python gamgmt.py user add 1234 test@test.com -perms READ_AND_ANALYZE EDIT COLLABORATE```
-- add user test@test.com to account 1234 with permissions read, edit and collaborate
+- add user test@test.com to account 1234 with permissions read, edit and collaborae
+```gamgmt user add 1234 test@test.com READ_AND_ANALYZE EDIT COLLABORATE```
 
-```python gamgmt.py user delete 1234 test@test.com```
 - delete user test@test.com to account 1234
+```gamgmt user delete 1234 test@test.com```
