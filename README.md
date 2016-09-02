@@ -46,19 +46,19 @@ Usage
 Examples:
 
 - list all your accounts
-```gamgmt account list```
+ ```gamgmt account list```
 
 - list all your properties
-```gamgmt property list```
+ ```gamgmt property list```
 
--  list all your profiles
-```gamgmt profile list ```
+-  list all your profiles 
+ ```gamgmt profile list ```
 
 - list all the users for specified account number 1234
-```gamgmt user list 1234```
+ ```gamgmt user list 1234```
 
 - add user test@test.com to account 1234 with permissions read, edit and collaborae
-```gamgmt user add 1234 test@test.com READ_AND_ANALYZE EDIT COLLABORATE```
+ ```gamgmt user add 1234 test@test.com READ_AND_ANALYZE EDIT COLLABORATE```
 
 - delete user test@test.com to account 1234
-```gamgmt user delete 1234 test@test.com```
+ ```gamgmt user delete 1234 test@test.com```
