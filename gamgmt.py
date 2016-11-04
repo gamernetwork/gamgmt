@@ -263,24 +263,29 @@ profile_parser_list.add_argument("--property", "-wp", help="id for property to g
 
 args = parser.parse_args()
 
+if args.fields:
+    fields = args.fields.split(',')
+else:
+    fields = None
+
 scope = ['https://www.googleapis.com/auth/analytics.readonly', 'https://www.googleapis.com/auth/analytics.manage.users']
 # Authenticate and construct service.
 service = get_service('analytics', 'v3', scope, CREDENTIALS_JSON)
 
 if args.object == "user":
     if args.action == "list":
-        list_users(service, args.account, args.property, args.profile, fields=args.fields)
+        list_users(service, args.account, args.property, args.profile, fields=fields)
     elif args.action == "add":
         add_user(service, args.account, args.email, args.permissions)
     elif args.action == "delete":
         delete_user(service, args.account, args.email)
 elif args.object == "account":
     if args.action == "list":
-        list_accounts(service, fields=args.fields)
+        list_accounts(service, fields=fields)
 elif args.object == "property":
     if args.action == "list":
-        list_properties(service, args.account, fields=args.fields)        
+        list_properties(service, args.account, fields=fields)        
 elif args.object == "profile":
     if args.action == "list":
-        list_profiles(service, args.account, args.property, fields=args.fields)
+        list_profiles(service, args.account, args.property, fields=fields)
         
